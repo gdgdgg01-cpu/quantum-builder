@@ -1,0 +1,35 @@
+name: Build APK
+
+on:
+  push:
+    branches: [ "main" ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          sudo apt update
+          sudo apt install -y python3-pip openjdk-17-jdk zip unzip
+          pip install buildozer cython
+
+      - name: Extract zip
+        run: |
+          unzip quantum_apk.zip -d quantum
+          cd quantum
+
+      - name: Build APK
+        run: |
+          cd quantum
+          buildozer -v android debug
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: quantum-apk
+          path: quantum/bin/*.apk
